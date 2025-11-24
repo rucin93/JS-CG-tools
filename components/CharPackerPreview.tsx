@@ -160,18 +160,24 @@ Then I'm sure she sells seashore shells.`)
           <TabsContent value="2-1">
             <p className="text-sm text-gray-500 mb-4">
               Packs 2 characters into 1 using Unicode characters. Good for general compression.
+              <br />
+              <br />
               credits to Xem <a href="https://xem.github.io/obfuscatweet-reloaded/">https://xem.github.io/obfuscatweet-reloaded/</a>
             </p>
           </TabsContent>
           <TabsContent value="2-1+">
             <p className="text-sm text-gray-500 mb-4">
               Enhanced 2-1+ packer with Unicode support. Better compression for code containing Unicode chars.
+              <br />
+              <br />
               credits to LukeG <a href="https://github.com/lukegustafson/jspacker_21plus">https://github.com/lukegustafson/jspacker_21plus</a>
             </p>
           </TabsContent>
           <TabsContent value="3-1">
             <p className="text-sm text-gray-500 mb-4">
               Packs 3 characters into 1. Higher compression ratio but larger mapping table.
+              <br />
+              <br />
               credits to <a href="https://github.com/romancortes">romancortes</a>
             </p>
           </TabsContent>
