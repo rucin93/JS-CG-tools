@@ -16,20 +16,7 @@ import SearchGraphVisualizer from "./SearchGraphVisualizer"
 
 export default function CrusherPreview() {
   const [input, setInput] = useState<string>(
-    `How much wood would a woodchuck chuck,
-If a woodchuck could chuck wood?
-A woodchuck would chuck all the wood he could chuck
-If a woodchuck would chuck wood.
-
-Peter Piper picked a peck of pickled peppers.
-A peck of pickled peppers Peter Piper picked.
-If Peter Piper picked a peck of pickled peppers,
-Where's the peck of pickled peppers Peter Piper picked?
-
-She sells seashells by the seashore,
-The shells she sells are seashells, I'm sure.
-So if she sells seashells on the seashore,
-Then I'm sure she sells seashore shells.` || "",
+    `` || "",
   )
   const [output, setOutput] = useState("")
   const [regpackOutput, setRegpackOutput] = useState("")
