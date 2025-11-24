@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RegPack - JavaScript Code Compression Tool</title>
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="RegPack is an advanced JavaScript code compression tool that uses regular expressions to achieve better compression ratios than traditional minifiers.">
+  <meta name="keywords" content="RegPack, JavaScript, compression, minification, code optimization, regular expressions">
+  <meta name="author" content="RegPack Team">
+  
+  <!-- Open Graph / Social Media Meta Tags -->
+  <meta property="og:title" content="RegPack - JavaScript Code Compression Tool">
+  <meta property="og:description" content="Advanced JavaScript compression using regular expressions patterns">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://regpack.io">
+  <meta property="og:image" content="/regpack-logo.png">
+  
+  <!-- Twitter Card Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="RegPack - JavaScript Code Compression Tool">
+  <meta name="twitter:description" content="Advanced JavaScript compression using regular expressions patterns">
+  <meta name="twitter:image" content="/regpack-logo.png">
+  
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  
+  <!-- Preload critical resources -->
+  <link rel="preload" href="/_next/static/chunks/main.js" as="script">
+  
+  <!-- Initialize any global variables or configurations -->
+  <script>
+    window.REGPACK_CONFIG = {
+      defaultBeamWidth: 5,
+      defaultMaxPatterns: 100,
+      defaultLookAheadDepth: 2,
+      enabledOptimizations: true
+    };
+  </script>
+</head>
+<body>
+  <!-- This div will be replaced by Next.js -->
+  <div id="__next"></div>
+  
+  <!-- Loading indicator that will be shown until the app loads -->
+  <div id="loading-indicator" style="display: flex; justify-content: center; align-items: center; height: 100vh; width: 100vw; position: fixed; top: 0; left: 0; background-color: #f9fafb;">
+    <div style="text-align: center;">
+      <h1 style="font-family: system-ui, -apple-system, sans-serif; color: #1f2937;">RegPack</h1>
+      <p style="font-family: system-ui, -apple-system, sans-serif; color: #6b7280;">Loading compression tools...</p>
+      <div style="width: 50px; height: 50px; border: 5px solid #e5e7eb; border-top-color: #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; margin: 20px auto;"></div>
+    </div>
+  </div>
+  
+  <style>
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+  </style>
+  
+  <!-- Script to hide loading indicator once Next.js has loaded -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Hide loading indicator when the app has loaded
+      const loadingIndicator = document.getElementById('loading-indicator');
+      if (loadingIndicator) {
+        setTimeout(() => {
+          loadingIndicator.style.display = 'none';
+        }, 500); // Small delay to ensure smooth transition
+      }
+    });
+  </script>
+</body>
+</html>
