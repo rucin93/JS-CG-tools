@@ -9,9 +9,9 @@ import type { PackerData } from "../models/PackerData"
 import type { PackerOptions } from "../types"
 
 export default function RegPackPreview() {
-  const [input, setInput] = useState("")
-  const [output, setOutput] = useState("")
-  const [details, setDetails] = useState("")
+  const [input, setInput] = useState<string>("")
+  const [output, setOutput] = useState<string>("")
+  const [details, setDetails] = useState<string>("")
   const [options, setOptions] = useState<PackerOptions>({
     crushGainFactor: 2,
     crushLengthFactor: 1,
@@ -32,7 +32,14 @@ export default function RegPackPreview() {
   const regPackRef = useRef<RegPack>(new RegPack())
 
   useEffect(() => {
-    if (input.trim() === "") return
+    // Guard against undefined or empty input
+    if (!input || typeof input !== "string" || input.trim() === "") {
+      setOutput("")
+      setDetails("")
+      setPackerData(null)
+      setPatternView(null)
+      return
+    }
 
     try {
       setError(null)
@@ -91,8 +98,13 @@ export default function RegPackPreview() {
     }))
   }
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newValue = e.target.value
+    setInput(newValue || "")
+  }
+
   const startOptimization = async () => {
-    if (input.trim() === "") {
+    if (!input || typeof input !== "string" || input.trim() === "") {
       setError("Please enter some code to optimize")
       return
     }
@@ -128,6 +140,10 @@ export default function RegPackPreview() {
       optimizerRef.current.abort()
     }
   }
+
+  const inputLength = input ? input.length : 0
+  const outputLength = output ? output.length : 0
+  const hasValidInput = input && typeof input === "string" && input.trim() !== ""
 
   return (
     <div className="flex flex-col min-h-screen p-4">
@@ -218,8 +234,8 @@ export default function RegPackPreview() {
             {!isOptimizing ? (
               <button
                 onClick={startOptimization}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
-                disabled={input.trim() === ""}
+                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded disabled:bg-gray-400 disabled:cursor-not-allowed"
+                disabled={!hasValidInput}
               >
                 Find Optimal Settings
               </button>
@@ -244,12 +260,12 @@ export default function RegPackPreview() {
 
         <div>
           <h2 className="text-lg font-semibold mb-2">Statistics</h2>
-          {packerData && (
+          {packerData && hasValidInput ? (
             <div className="bg-gray-100 p-3 rounded">
-              <p>Original size: {input.length} bytes</p>
-              <p>Packed size: {output.length} bytes</p>
-              <p>Compression ratio: {input.length ? ((output.length / input.length) * 100).toFixed(2) : "0"}%</p>
-              <p>Savings: {input.length ? ((1 - output.length / input.length) * 100).toFixed(2) : "0"}%</p>
+              <p>Original size: {inputLength} bytes</p>
+              <p>Packed size: {outputLength} bytes</p>
+              <p>Compression ratio: {inputLength ? ((outputLength / inputLength) * 100).toFixed(2) : "0"}%</p>
+              <p>Savings: {inputLength ? ((1 - outputLength / inputLength) * 100).toFixed(2) : "0"}%</p>
 
               {optimizationResult && (
                 <div className="mt-3 pt-3 border-t border-gray-300">
@@ -266,6 +282,10 @@ export default function RegPackPreview() {
                 </div>
               )}
             </div>
+          ) : (
+            <div className="bg-gray-100 p-3 rounded text-gray-500">
+              <p>Enter code to see statistics</p>
+            </div>
           )}
         </div>
       </div>
@@ -275,7 +295,7 @@ export default function RegPackPreview() {
           <h2 className="text-lg font-semibold mb-2">Input</h2>
           <textarea
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={handleInputChange}
             className="w-full h-full min-h-[300px] p-3 border rounded font-mono text-sm"
             placeholder="Paste your JavaScript code here..."
             disabled={isOptimizing}
@@ -320,9 +340,13 @@ export default function RegPackPreview() {
               </pre>
             )}
 
-            {activeTab === "pattern" && patternView && (
+            {activeTab === "pattern" && (
               <div className="w-full h-full min-h-[300px] p-3 border rounded overflow-auto">
-                <div dangerouslySetInnerHTML={{ __html: patternView.outerHTML }} />
+                {patternView ? (
+                  <div dangerouslySetInnerHTML={{ __html: patternView.outerHTML }} />
+                ) : (
+                  <p className="text-gray-500">No pattern data available</p>
+                )}
               </div>
             )}
           </div>
@@ -330,27 +354,26 @@ export default function RegPackPreview() {
       </div>
 
       <style jsx>{`
-  .depth0 { background-color: #ffffff; }
-  .depth1 { background-color: #e6f7ff; border-bottom: 1px solid #91d5ff; }
-  .depth2 { background-color: #d9f2ff; border-bottom: 1px solid #69c0ff; }
-  .depth3 { background-color: #bae7ff; border-bottom: 1px solid #40a9ff; }
-  .depth4 { background-color: #91d5ff; border-bottom: 1px solid #1890ff; }
-  .depth5 { background-color: #69c0ff; border-bottom: 1px solid #096dd9; color: #003a8c; }
-  .depth6 { background-color: #40a9ff; border-bottom: 1px solid #0050b3; color: #002766; }
-  .depth7 { background-color: #1890ff; border-bottom: 1px solid #003a8c; color: #ffffff; }
-  .depth8 { background-color: #096dd9; border-bottom: 1px solid #002766; color: #ffffff; }
-  .depth9 { background-color: #0050b3; border-bottom: 1px solid #001d66; color: #ffffff; }
-  
-  /* Add hover effects */
-  span[class^="depth"]:hover {
-    filter: brightness(1.1);
-    box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
-    cursor: pointer;
-    position: relative;
-    z-index: 1;
-  }
-`}</style>
-
+        .depth0 { background-color: #ffffff; }
+        .depth1 { background-color: #e6f7ff; border-bottom: 1px solid #91d5ff; }
+        .depth2 { background-color: #d9f2ff; border-bottom: 1px solid #69c0ff; }
+        .depth3 { background-color: #bae7ff; border-bottom: 1px solid #40a9ff; }
+        .depth4 { background-color: #91d5ff; border-bottom: 1px solid #1890ff; }
+        .depth5 { background-color: #69c0ff; border-bottom: 1px solid #096dd9; color: #003a8c; }
+        .depth6 { background-color: #40a9ff; border-bottom: 1px solid #0050b3; color: #002766; }
+        .depth7 { background-color: #1890ff; border-bottom: 1px solid #003a8c; color: #ffffff; }
+        .depth8 { background-color: #096dd9; border-bottom: 1px solid #002766; color: #ffffff; }
+        .depth9 { background-color: #0050b3; border-bottom: 1px solid #001d66; color: #ffffff; }
+        
+        /* Add hover effects */
+        span[class^="depth"]:hover {
+          filter: brightness(1.1);
+          box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
+          cursor: pointer;
+          position: relative;
+          z-index: 1;
+        }
+      `}</style>
     </div>
   )
 }

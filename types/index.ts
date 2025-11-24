@@ -27,6 +27,7 @@ export interface PackerOptions {
   onComplete?: (result: PackerResult) => void // Callback when worker completes
   beamWidth?: number // Added beam width parameter for beam search
   lookAheadDepth?: number // Added look-ahead depth parameter for multi-level gain predictions
+  maxInt?: number // Added maxInt parameter for Replacer token range (1-100)
 }
 
 export interface ProgressInfo {
