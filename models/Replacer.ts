@@ -41,8 +41,9 @@ export class Replacer {
   private maxReplacements = 10 // Limited to digits 0-9
   private worker: Worker | null = null
 
-  constructor() {
+  constructor(maxInt = 10) {
     this.stringHelper = StringHelper.getInstance()
+    this.maxReplacements = Math.min(Math.max(1, maxInt), 100) // Clamp between 1 and 100
   }
 
   /**
@@ -118,7 +119,8 @@ export class Replacer {
         const pattern = s.substring(i, i + length)
 
         // Skip if already processed or if pattern contains digits
-        if (matches[pattern] !== undefined || /[0-9]/.test(pattern)) continue
+        const digitRegex = this.maxReplacements <= 10 ? /[0-9]/ : /\d/
+        if (matches[pattern] !== undefined || digitRegex.test(pattern)) continue
 
         // Count occurrences
         let count = 0
@@ -172,7 +174,7 @@ export class Replacer {
 
     // Beam search parameters
     const beamWidth = options.beamWidth || 5 // Use provided beam width or default to 5
-    const maxDepth = this.maxReplacements // Maximum depth of search (limited by available digits 0-9)
+    const maxDepth = this.maxReplacements // Maximum depth of search
 
     // State representation
     interface State {
@@ -203,7 +205,7 @@ export class Replacer {
       const candidates: State[] = []
 
       for (const state of beam) {
-        // Skip if we've already used all 10 digits or no patterns remain
+        // Skip if we've already used all maxReplacements or no patterns remain
         if (state.replacements.length >= this.maxReplacements || state.patterns.length === 0) {
           candidates.push(state) // Keep this state as a candidate
           continue
@@ -296,10 +298,12 @@ export class Replacer {
     for (let i = 0; i < replacements.length; i++) {
       const pattern = replacements[i]
 
+      const token = i.toString()
+
       // Count occurrences in the final text
       let count = 0
       for (let j = 0; j < s.length; j++) {
-        if (s[j] === i.toString()) {
+        if (s.substring(j, j + token.length) === token) {
           count++
         }
       }
@@ -308,7 +312,7 @@ export class Replacer {
       const patternGain = (pattern.length - 1) * count - pattern.length - 1
 
       packerData.matchesLookup.push({
-        token: i.toString(),
+        token: token,
         string: pattern,
         originalString: pattern,
         depends: "",
@@ -324,9 +328,9 @@ export class Replacer {
       details += `${i} : gain=${patternGain}, copies=${count}, length=${pattern.length}, str = ${pattern}\n`
     }
 
-    // Generate the decoder
     const decoderArray = `\`${replacements.join("|")}\`.split\`|\``
-    const decoder = `.replace(/\\d/g,i=>${decoderArray}[i])`
+    const decoderPattern = this.maxReplacements <= 10 ? "\\d" : "\\d+"
+    const decoder = `.replace(/${decoderPattern}/g,i=>${decoderArray}[i])`
 
     // Create the final packed output
     const packedOutput = `\`${s}\`${decoder}`
@@ -584,8 +588,8 @@ export class Replacer {
 
     // Simulate the unpacking process
     let unpacked = compressed
-    for (let i = 0; i < 10 && i < replacements.length; i++) {
-      const regex = new RegExp(i.toString(), "g")
+    for (let i = 0; i < this.maxReplacements && i < replacements.length; i++) {
+      const regex = new RegExp(i.toString().replace(/\d/g, "\\d"), "g")
       unpacked = unpacked.replace(regex, replacements[i])
     }
 

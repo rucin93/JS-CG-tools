@@ -46,6 +46,7 @@ Then I'm sure she sells seashore shells.` || "",
     maxBranchDepth: 5,
     maxStates: 10000,
     beamWidth: 5, // Default beam width
+    maxInt: 10, // Add maxInt option with default value
   })
   const [packerData, setPackerData] = useState<PackerData | null>(null)
   const [regpackData, setRegpackData] = useState<PackerData | null>(null)
@@ -70,9 +71,8 @@ Then I'm sure she sells seashore shells.` || "",
   const [showSearchGraph, setShowSearchGraph] = useState(false)
 
   // Packer instances
-  const crusherRef = useRef<Crusher>(new Crusher(CrusherHeuristic.BALANCED))
   const regPackRef = useRef<RegPack>(new RegPack())
-  const replacerRef = useRef<Replacer>(new Replacer())
+  const replacerRef = useRef<Replacer>(new Replacer(options.maxInt || 10))
 
   // Optimization state
   const [isOptimizing, setIsOptimizing] = useState(false)
@@ -96,8 +96,8 @@ Then I'm sure she sells seashore shells.` || "",
 
   // Update crusher instance when heuristic changes
   useEffect(() => {
-    crusherRef.current = new Crusher(selectedHeuristic)
-  }, [selectedHeuristic])
+    replacerRef.current = new Replacer(options.maxInt || 10)
+  }, [options.maxInt])
 
   // Effect to update waiting state when options change
   useEffect(() => {
@@ -172,11 +172,9 @@ Then I'm sure she sells seashore shells.` || "",
       }
 
       // Run all packers for comparison
-      const crusher = crusherRef.current
       const regPack = regPackRef.current
       const replacer = replacerRef.current
 
-      const crusherResult = crusher.runPacker(input, options)
       const regPackResult = regPack.runPacker(input, options)
 
       // Try to run Replacer, but handle the case where input contains digits
@@ -211,36 +209,7 @@ Then I'm sure she sells seashore shells.` || "",
       }
 
       // Process results based on selected encoder
-      if (selectedEncoder === "crusher" && crusherResult && crusherResult.length > 0) {
-        setPackerData(crusherResult[0])
-
-        // Process Crusher results
-        if (crusherResult[0].result && crusherResult[0].result.length >= 2 && crusherResult[0].result[1]) {
-          setOutput(crusherResult[0].result[1].output || "")
-          setDetails(crusherResult[0].result[1].details || "")
-        } else if (crusherResult[0].result && crusherResult[0].result.length >= 1 && crusherResult[0].result[0]) {
-          setOutput(crusherResult[0].result[0].output || "")
-          setDetails(crusherResult[0].result[0].details || "")
-        } else {
-          setOutput("")
-          setDetails("Error: No valid output generated")
-          setError("Failed to generate output")
-        }
-
-        // Generate pattern view
-        try {
-          if (crusherResult[0].matchesLookup) {
-            const patternViewer = new PatternViewer()
-            const patternElement = patternViewer.render(input, crusherResult[0].matchesLookup)
-            setPatternView(patternElement)
-          } else {
-            setPatternView(null)
-          }
-        } catch (patternError) {
-          console.error("Error generating pattern view:", patternError)
-          setPatternView(null)
-        }
-      } else if (selectedEncoder === "replacer" && replacerResult && replacerResult.length > 0) {
+      if (selectedEncoder === "replacer" && replacerResult && replacerResult.length > 0) {
         // Only update if we're not in waiting mode or if we're explicitly running compression
         if (!options.useBranchSearch || shouldRunCompression) {
           setPackerData(replacerResult[0])
@@ -349,12 +318,7 @@ Then I'm sure she sells seashore shells.` || "",
 
     try {
       // Get the current active packer based on selected encoder
-      const activePacker: AbstractPacker =
-        selectedEncoder === "crusher"
-          ? crusherRef.current
-          : selectedEncoder === "replacer"
-            ? replacerRef.current
-            : regPackRef.current
+      const activePacker: AbstractPacker = selectedEncoder === "replacer" ? replacerRef.current : regPackRef.current
 
       // Create a new optimizer with the active packer
       optimizerRef.current = new PackerOptimizer(activePacker, input, (result) => {
@@ -521,13 +485,11 @@ Then I'm sure she sells seashore shells.` || "",
                 className="w-full mt-1 p-2 border rounded"
                 disabled={isOptimizing || isBranchSearching}
               >
-                <option value="crusher">Crusher</option>
                 <option value="replacer">Replacer (Digit-based)</option>
                 <option value="regpack">RegPack (Original)</option>
               </select>
             </label>
             <p className="text-xs text-gray-500 mt-1">
-              {selectedEncoder === "crusher" && "Enhanced packer with multiple heuristic strategies"}
               {selectedEncoder === "replacer" &&
                 "Minimal packer using digit replacements (input must not contain digits 0-9)"}
               {selectedEncoder === "regpack" && "Original RegPack implementation"}
@@ -535,38 +497,6 @@ Then I'm sure she sells seashore shells.` || "",
           </div>
 
           {/* Show heuristic selection only for Crusher */}
-          {selectedEncoder === "crusher" && (
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">
-                Heuristic Strategy
-                <select
-                  name="heuristic"
-                  value={selectedHeuristic}
-                  onChange={(e) => setSelectedHeuristic(e.target.value as CrusherHeuristic)}
-                  className="w-full mt-1 p-2 border rounded"
-                  disabled={isOptimizing || isBranchSearching}
-                >
-                  <option value={CrusherHeuristic.BALANCED}>Balanced</option>
-                  <option value={CrusherHeuristic.MOST_COPIES}>Most Copies</option>
-                  <option value={CrusherHeuristic.LONGEST}>Longest Patterns</option>
-                  <option value={CrusherHeuristic.DENSITY}>Highest Density</option>
-                  <option value={CrusherHeuristic.ADAPTIVE}>Adaptive (Mixed Heuristics)</option>
-                  <option value={CrusherHeuristic.ADAPTIVE_GAIN}>Adaptive Gain (copies * length)</option>
-                </select>
-              </label>
-              <p className="text-xs text-gray-500 mt-1">
-                {selectedHeuristic === CrusherHeuristic.BALANCED && "Balanced approach considering multiple factors"}
-                {selectedHeuristic === CrusherHeuristic.MOST_COPIES && "Prioritize patterns with the most repetitions"}
-                {selectedHeuristic === CrusherHeuristic.LONGEST && "Prioritize the longest patterns"}
-                {selectedHeuristic === CrusherHeuristic.DENSITY &&
-                  "Prioritize patterns with highest density (copies × length)"}
-                {selectedHeuristic === CrusherHeuristic.ADAPTIVE &&
-                  "Dynamically select the best heuristic for each compression step"}
-                {selectedHeuristic === CrusherHeuristic.ADAPTIVE_GAIN &&
-                  "Prioritize patterns with highest gain (copies × length)"}
-              </p>
-            </div>
-          )}
 
           {selectedEncoder !== "replacer" && (
             <div className="grid grid-cols-2 gap-4">
@@ -631,81 +561,104 @@ Then I'm sure she sells seashore shells.` || "",
 
           {/* Add branch search option for Replacer */}
           {selectedEncoder === "replacer" && (
-            <div className="mt-2">
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  name="useBranchSearch"
-                  checked={options.useBranchSearch}
-                  onChange={(e) => {
-                    handleOptionChange(e)
-                    // If turning off branch search, run compression automatically
-                    if (!e.target.checked) {
-                      setShouldRunCompression(true)
-                    }
-                  }}
-                  className="mr-2"
-                  disabled={isOptimizing || isBranchSearching}
-                />
-                <span className="text-sm font-medium">Use Web Worker Branch Search (optimal but non-blocking)</span>
-              </label>
-              {options.useBranchSearch && (
-                <>
-                  {options.useBranchSearch && (
-                    <div>
-                      <label className="block text-sm font-medium mb-1">
-                        Beam Width
-                        <input
-                          type="number"
-                          name="beamWidth"
-                          value={options.beamWidth || 5}
-                          onChange={handleOptionChange}
-                          min="1"
-                          max="20"
-                          step="1"
-                          className="w-full mt-1 p-2 border rounded"
-                          disabled={isOptimizing || isBranchSearching}
-                        />
-                      </label>
-                      <p className="text-xs text-gray-500">
-                        Number of candidate solutions to maintain at each step (higher = more thorough but slower)
-                      </p>
-                    </div>
-                  )}
+            <>
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">
+                  Max Integer Range (1-100)
+                  <input
+                    type="number"
+                    name="maxInt"
+                    value={options.maxInt || 10}
+                    onChange={handleOptionChange}
+                    min="1"
+                    max="100"
+                    step="1"
+                    className="w-full mt-1 p-2 border rounded"
+                    disabled={isOptimizing || isBranchSearching}
+                  />
+                </label>
+                <p className="text-xs text-gray-500">
+                  Number of tokens to use for replacements (default 0-9 = 10 tokens). Higher values allow more
+                  replacements but require larger tokens.
+                </p>
+              </div>
 
-                  {isBranchSearching ? (
-                    <div className="mt-4 space-y-2">
-                      <div className="flex items-center">
-                        <div className="w-full bg-gray-200 rounded-full h-2.5 mr-2">
-                          <div
-                            className="bg-green-600 h-2.5 rounded-full"
-                            style={{ width: `${branchSearchProgress * 100}%` }}
-                          ></div>
-                        </div>
-                        <span className="text-sm">{Math.round(branchSearchProgress * 100)}%</span>
+              <div className="mt-2">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    name="useBranchSearch"
+                    checked={options.useBranchSearch}
+                    onChange={(e) => {
+                      handleOptionChange(e)
+                      // If turning off branch search, run compression automatically
+                      if (!e.target.checked) {
+                        setShouldRunCompression(true)
+                      }
+                    }}
+                    className="mr-2"
+                    disabled={isOptimizing || isBranchSearching}
+                  />
+                  <span className="text-sm font-medium">Use Web Worker Branch Search (optimal but non-blocking)</span>
+                </label>
+                {options.useBranchSearch && (
+                  <>
+                    {options.useBranchSearch && (
+                      <div>
+                        <label className="block text-sm font-medium mb-1">
+                          Beam Width
+                          <input
+                            type="number"
+                            name="beamWidth"
+                            value={options.beamWidth || 5}
+                            onChange={handleOptionChange}
+                            min="1"
+                            max="20"
+                            step="1"
+                            className="w-full mt-1 p-2 border rounded"
+                            disabled={isOptimizing || isBranchSearching}
+                          />
+                        </label>
+                        <p className="text-xs text-gray-500">
+                          Number of candidate solutions to maintain at each step (higher = more thorough but slower)
+                        </p>
                       </div>
-                      <p className="text-sm">{branchSearchMessage}</p>
-                      {branchSearchDetails && <p className="text-xs text-gray-600">{branchSearchDetails}</p>}
-                      <p className="text-xs text-blue-600">Performing exhaustive search for optimal compression</p>
+                    )}
+
+                    {isBranchSearching ? (
+                      <div className="mt-4 space-y-2">
+                        <div className="flex items-center">
+                          <div className="w-full bg-gray-200 rounded-full h-2.5 mr-2">
+                            <div
+                              className="bg-green-600 h-2.5 rounded-full"
+                              style={{ width: `${branchSearchProgress * 100}%` }}
+                            ></div>
+                          </div>
+                          <span className="text-sm">{Math.round(branchSearchProgress * 100)}%</span>
+                        </div>
+                        <p className="text-sm">{branchSearchMessage}</p>
+                        {branchSearchDetails && <p className="text-xs text-gray-600">{branchSearchDetails}</p>}
+                        <p className="text-xs text-blue-600">Performing exhaustive search for optimal compression</p>
+                        <button
+                          onClick={stopBranchSearch}
+                          className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
+                        >
+                          Stop Web Worker
+                        </button>
+                      </div>
+                    ) : (
                       <button
-                        onClick={stopBranchSearch}
-                        className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
+                        onClick={triggerCompression}
+                        className="mt-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
+                        disabled={isOptimizing || isBranchSearching || (input || "").trim() === ""}
                       >
-                        Stop Web Worker
+                        Run Exhaustive Branch Search
                       </button>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={triggerCompression}
-                      className="mt-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
-                      disabled={isOptimizing || isBranchSearching || (input || "").trim() === ""}
-                    >
-                      Run Exhaustive Branch Search
-                    </button>
-                  )}
-                </>
-              )}
-            </div>
+                    )}
+                  </>
+                )}
+              </div>
+            </>
           )}
 
           <div className="mt-4 flex space-x-2">

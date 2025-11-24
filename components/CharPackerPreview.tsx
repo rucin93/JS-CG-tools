@@ -102,13 +102,13 @@ Then I'm sure she sells seashore shells.`)
 
       // Calculate stats
       const originalLength = input.length
-      const packedLength = [...(safeResult?.packed || '')].length
+      const packedLength = [...(safeResult?.packed || "")].length
       const originalBytes = getByteSize(input)
       const packedBytes = getByteSize(safeResult.packed)
-      const totalSize = packedLength
+      const totalSize = packedBytes
       const compressionRatio = originalLength > 0 ? packedLength / originalLength : 0
       const byteCompressionRatio = originalBytes > 0 ? packedBytes / originalBytes : 0
-      const savings = originalLength - totalSize
+      const savings = originalLength - packedLength
       const byteSavings = originalBytes - packedBytes
 
       setStats({
@@ -209,24 +209,30 @@ Then I'm sure she sells seashore shells.`)
               <p className="text-sm font-medium">
                 {stats.savings > 0
                   ? `Character savings: ${stats.savings} characters (${((stats.savings / stats.originalLength) * 100).toFixed(2)}%)`
-                  : "No character savings"}
+                  : stats.savings < 0
+                    ? `Character increase: ${Math.abs(stats.savings)} characters (${((Math.abs(stats.savings) / stats.originalLength) * 100).toFixed(2)}%)`
+                    : "No change in character count"}
               </p>
             </div>
           </div>
           <div>
             <h3 className="text-sm font-medium mb-2">Byte Statistics</h3>
-            <div className="bg-gray-100 p-3 rounded-md">
+            <div className="bg-blue-50 p-3 rounded-md border border-blue-200">
               <p className="text-sm">
-                Original size: {formatBytes(stats.originalBytes)} ({stats.originalBytes} bytes)
+                Original size: <span className="font-medium">{formatBytes(stats.originalBytes)}</span> (
+                {stats.originalBytes} bytes)
               </p>
               <p className="text-sm">
-                Packed size: {formatBytes(stats.packedBytes)} ({stats.packedBytes} bytes)
+                Packed size: <span className="font-medium">{formatBytes(stats.packedBytes)}</span> ({stats.packedBytes}{" "}
+                bytes)
               </p>
               <p className="text-sm">Byte compression ratio: {(stats.byteCompressionRatio * 100).toFixed(2)}%</p>
               <p className="text-sm font-medium">
                 {stats.byteSavings > 0
                   ? `Byte savings: ${formatBytes(stats.byteSavings)} (${((stats.byteSavings / stats.originalBytes) * 100).toFixed(2)}%)`
-                  : "No byte savings"}
+                  : stats.byteSavings < 0
+                    ? `Byte increase: ${formatBytes(Math.abs(stats.byteSavings))} (${((Math.abs(stats.byteSavings) / stats.originalBytes) * 100).toFixed(2)}%)`
+                    : "No byte savings"}
               </p>
             </div>
           </div>
@@ -243,7 +249,9 @@ Then I'm sure she sells seashore shells.`)
             <>
               {stats.byteSavings > 0
                 ? `Reduced from ${formatBytes(stats.originalBytes)} to ${formatBytes(stats.packedBytes)}`
-                : `No size reduction`}
+                : stats.byteSavings < 0
+                  ? `Increased from ${formatBytes(stats.originalBytes)} to ${formatBytes(stats.packedBytes)}`
+                  : `No size change`}
             </>
           )}
         </div>
