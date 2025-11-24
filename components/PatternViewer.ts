@@ -2,6 +2,19 @@ import type { Match } from "../types"
 
 export class PatternViewer {
   /**
+   * Escapes special characters for display
+   */
+  private escapeChar(char: string): string {
+    switch (char) {
+      case '\n': return '\\n'
+      case '\r': return '\\r'
+      case '\t': return '\\t'
+      case '\\': return '\\\\'
+      default: return char
+    }
+  }
+
+  /**
    * Produces an HTML render of the patterns used by the packer.
    * @param unpackedCode The original unpacked code (after preprocessing)
    * @param matchesLookup Pattern set from RegPack
@@ -66,7 +79,7 @@ export class PatternViewer {
 
       // Protect against overflow on that last character
       if (offset < unpackedCode.length) {
-        currentNodeContents += unpackedCode[offset]
+        currentNodeContents += this.escapeChar(unpackedCode[offset])
       }
     }
 
