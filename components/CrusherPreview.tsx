@@ -15,9 +15,7 @@ import type { AbstractPacker } from "../models/AbstractPacker"
 import SearchGraphVisualizer from "./SearchGraphVisualizer"
 
 export default function CrusherPreview() {
-  const [input, setInput] = useState<string>(
-    `` || "",
-  )
+  const [input, setInput] = useState<string>("")
   const [output, setOutput] = useState("")
   const [regpackOutput, setRegpackOutput] = useState("")
   const [replacerOutput, setReplacerOutput] = useState("")
@@ -879,12 +877,7 @@ export default function CrusherPreview() {
 
             {activeTab === "comparison" && comparisonMode && (
               <div className="w-full h-full min-h-[300px] p-3 border rounded overflow-auto">
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <h3 className="font-semibold mb-2">Crusher Output</h3>
-                    <pre className="text-xs p-2 bg-gray-50 rounded overflow-auto">{output}</pre>
-                    <p className="mt-2">Size: {output.length} bytes</p>
-                  </div>
+                <div className="grid grid-cols-2 gap-4">
                   <div>
                     <h3 className="font-semibold mb-2">RegPack Output</h3>
                     <pre className="text-xs p-2 bg-gray-50 rounded overflow-auto">{regpackOutput}</pre>
