@@ -161,6 +161,7 @@ Then I'm sure she sells seashore shells.`)
             <p className="text-sm text-gray-500 mb-4">
               Packs 2 characters into 1 using Unicode characters. Good for general compression.
               credits to Xem <a href="https://xem.github.io/obfuscatweet-reloaded/">https://xem.github.io/obfuscatweet-reloaded/</a>
+            </p>
           </TabsContent>
           <TabsContent value="2-1+">
             <p className="text-sm text-gray-500 mb-4">
