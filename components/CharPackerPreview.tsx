@@ -8,19 +8,7 @@ import { getCharPacker } from "@/models/CharPacker"
 
 // Helper function to calculate byte size of a string
 function getByteSize(str: string): number {
-  try {
-    return new TextEncoder().encode(str).length
-  } catch (e) {
-    // Fallback for environments without TextEncoder
-    let s = str.length
-    for (let i = str.length - 1; i >= 0; i--) {
-      const code = str.charCodeAt(i)
-      if (code > 0x7f && code <= 0x7ff) s++
-      else if (code > 0x7ff && code <= 0xffff) s += 2
-      if (code >= 0xdc00 && code <= 0xdfff) i-- // Trail surrogate of a surrogate pair
-    }
-    return s
-  }
+  return new Blob([str]).size
 }
 
 // Helper function to format byte sizes
