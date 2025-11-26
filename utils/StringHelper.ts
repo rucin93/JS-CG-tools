@@ -184,3 +184,7 @@ export class StringHelper {
     return ascii === 92 || ascii === 93 || ascii === 96
   }
 }
+
+export const getByteCount = (str: string): number => {
+  return new Blob([str]).size
+}

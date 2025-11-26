@@ -7,6 +7,7 @@ import { PackerOptimizer, type OptimizationResult } from "../models/PackerOptimi
 import { PatternViewer } from "./PatternViewer"
 import type { PackerData } from "../models/PackerData"
 import type { PackerOptions } from "../types"
+import { getByteCount } from "../utils/StringHelper"
 
 export default function RegPackPreview() {
   const [input, setInput] = useState<string>("")
@@ -262,10 +263,10 @@ export default function RegPackPreview() {
           <h2 className="text-lg font-semibold mb-2">Statistics</h2>
           {packerData && hasValidInput ? (
             <div className="bg-gray-100 p-3 rounded">
-              <p>Original size: {inputLength} bytes</p>
-              <p>Packed size: {outputLength} bytes</p>
-              <p>Compression ratio: {inputLength ? ((outputLength / inputLength) * 100).toFixed(2) : "0"}%</p>
-              <p>Savings: {inputLength ? ((1 - outputLength / inputLength) * 100).toFixed(2) : "0"}%</p>
+              <p>Original size: {getByteCount(input)} bytes</p>
+              <p>Packed size: {getByteCount(output)} bytes</p>
+              <p>Compression ratio: {getByteCount(input) ? ((getByteCount(output) / getByteCount(input)) * 100).toFixed(2) : "0"}%</p>
+              <p>Savings: {getByteCount(input) ? ((1 - getByteCount(output) / getByteCount(input)) * 100).toFixed(2) : "0"}%</p>
 
               {optimizationResult && (
                 <div className="mt-3 pt-3 border-t border-gray-300">

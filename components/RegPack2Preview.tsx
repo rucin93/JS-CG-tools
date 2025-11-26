@@ -7,6 +7,7 @@ import { PatternViewer } from "./PatternViewer"
 import SearchGraphVisualizer from "./SearchGraphVisualizer"
 import type { PackerData } from "../models/PackerData"
 import type { PackerOptions } from "../types"
+import { getByteCount } from "../utils/StringHelper"
 
 export default function RegPack2Preview() {
   const [input, setInput] = useState("")
@@ -149,10 +150,10 @@ export default function RegPack2Preview() {
           <h2 className="text-lg font-semibold mb-2">Statistics</h2>
           {packerData && (
             <div className="bg-gray-100 p-3 rounded">
-              <p>Original size: {input.length} bytes</p>
-              <p>Packed size: {output.length} bytes</p>
-              <p>Compression ratio: {input.length ? ((output.length / input.length) * 100).toFixed(2) : "0"}%</p>
-              <p>Savings: {input.length ? ((1 - output.length / input.length) * 100).toFixed(2) : "0"}%</p>
+              <p>Original size: {getByteCount(input)} bytes</p>
+              <p>Packed size: {getByteCount(output)} bytes</p>
+              <p>Compression ratio: {getByteCount(input) ? ((getByteCount(output) / getByteCount(input)) * 100).toFixed(2) : "0"}%</p>
+              <p>Savings: {getByteCount(input) ? ((1 - getByteCount(output) / getByteCount(input)) * 100).toFixed(2) : "0"}%</p>
               <p>Beam width: {options.beamWidth || 5}</p>
               {searchGraphData && (
                 <div className="mt-2">
