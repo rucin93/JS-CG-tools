@@ -8,9 +8,13 @@ import { PatternViewer } from "./PatternViewer"
 import type { PackerData } from "../models/PackerData"
 import type { PackerOptions } from "../types"
 import { getByteCount } from "../utils/StringHelper"
+import { useInputStore } from "@/store/useInputStore"
 
 export default function RegPackPreview() {
-  const [input, setInput] = useState<string>("")
+  const { globalInput, setGlobalInput } = useInputStore()
+  const input = globalInput
+  const setInput = setGlobalInput
+  
   const [output, setOutput] = useState<string>("")
   const [details, setDetails] = useState<string>("")
   const [options, setOptions] = useState<PackerOptions>({

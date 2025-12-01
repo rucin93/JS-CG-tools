@@ -28,6 +28,8 @@ export interface PackerOptions {
   beamWidth?: number // Added beam width parameter for beam search
   lookAheadDepth?: number // Added look-ahead depth parameter for multi-level gain predictions
   maxInt?: number // Added maxInt parameter for Replacer token range (1-100)
+  maxReplacements?: number // Maximum number of replacements to perform
+  prioritizeHighestGain?: boolean // Whether to prioritize replacements with highest gain
 }
 
 export interface ProgressInfo {

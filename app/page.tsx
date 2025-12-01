@@ -21,7 +21,7 @@ export default function Home() {
         <TabsList className="mb-4">
           <TabsTrigger value="charpacker">Character packers</TabsTrigger>
           <TabsTrigger value="regpack">RegPack</TabsTrigger>
-          {/* <TabsTrigger value="regpack2">RegPack2 (Beam Search)</TabsTrigger> */}
+          <TabsTrigger value="regpack2">SlowPack (Beam Search)</TabsTrigger>
           <TabsTrigger value="crusher">Regex Packers</TabsTrigger>
         </TabsList>
         <TabsContent value="regpack">

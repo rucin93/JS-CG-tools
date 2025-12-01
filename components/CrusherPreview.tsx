@@ -10,12 +10,16 @@ import { PatternViewer } from "./PatternViewer"
 import type { PackerData } from "../models/PackerData"
 import type { PackerOptions, ProgressInfo, PackerResult } from "../types"
 import type { AbstractPacker } from "../models/AbstractPacker"
+import { useInputStore } from "@/store/useInputStore"
 
 // Add this import at the top
 import SearchGraphVisualizer from "./SearchGraphVisualizer"
 
 export default function CrusherPreview() {
-  const [input, setInput] = useState<string>("")
+  const { globalInput, setGlobalInput } = useInputStore()
+  const input = globalInput
+  const setInput = setGlobalInput
+
   const [output, setOutput] = useState("")
   const [regpackOutput, setRegpackOutput] = useState("")
   const [replacerOutput, setReplacerOutput] = useState("")

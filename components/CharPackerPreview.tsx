@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { getCharPacker } from "@/models/CharPacker"
+import { useInputStore } from "@/store/useInputStore"
 
 // Helper function to calculate byte size of a string
 function getByteSize(str: string): number {
@@ -19,7 +20,9 @@ function formatBytes(bytes: number): string {
 }
 
 export default function CharPackerPreview() {
-  const [input, setInput] = useState<string>(``)
+  const { globalInput, setGlobalInput } = useInputStore()
+  const input = globalInput
+  const setInput = setGlobalInput
 
   const [packerType, setPackerType] = useState<string>("2-1")
   const [output, setOutput] = useState<{ packed: string; mapping?: any }>({ packed: "" })
